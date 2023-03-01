@@ -1,0 +1,5 @@
+---
+- name: Install kube-prometheus
+  hosts: monitoring
+  roles:
+    - kube-prometheus
