@@ -1,3 +1,4 @@
 ---
 # defaults file for kube-prometheus
-namespace: monitoring
+kube_prometheus_stack_release_name: kube-prometheus-stack
+kube_prometheus_stack_namespace: monitoring

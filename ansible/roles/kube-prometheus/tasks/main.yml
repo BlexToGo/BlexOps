@@ -1,2 +1,23 @@
 ---
 # tasks file for kube-prometheus
+
+- name: Create monitoring namespace
+  kubernetes.core.k8s:
+    name: "{{ kube_prometheus_stack_namespace }}"
+    kind: Namespace
+
+- name: Add prometheus-community helm repo
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: "https://prometheus-community.github.io/helm-charts"
+
+- name: Install the kube-prometheus-stack
+  kubernetes.core.helm:
+    name: "{{ kube_prometheus_stack_release_name }}"
+    chart_ref: prometheus-community/kube-prometheus-stack
+    update_repo_cache: true
+    chart_version: "{{ kube_prometheus_stack_chart_version }}"
+    release_namespace: "{{ kube_prometheus_stack_namespace }}"
+    values:
+      "{{ kube_prometheus_stack_values }}"
+  tags: helm_install
