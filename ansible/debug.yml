@@ -1,13 +1,23 @@
 # Playbook to connections, references, variables, etc.
 ---
-- name: Display all variables/facts known for a host
-  hosts: localhost
-  tasks:
-    - ansible.builtin.debug:
-        var: hostvars[inventory_hostname]
-- name: ping host machine
-  hosts: localhost
+- name: Debug information
+  hosts: all
   #connection: local #can be replaced by adding "localhost ansible_connection=local" to the hosts file
   tasks:
-    - name: test connection
-      ansible.builtin.ping:
+    - name: Print the ansible hostname
+      debug:
+        var: ansible_hostname
+    - name: Print out the inventory file in use
+      debug:
+        var: inventory_file
+    - name: Display the ansible groups for each host
+      debug:
+        var: group_names
+    - name: ping all hosts
+      ping:
+
+# - name: Display all variables/facts known for a host
+#   hosts: all
+#   tasks:
+#     - debug:
+#         var: hostvars[inventory_hostname]
