@@ -1,5 +1,5 @@
 ---
 - name: Install kube-prometheus
-  hosts: monitoring
+  hosts: docker-desktop
   roles:
     - kube-prometheus
