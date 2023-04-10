@@ -1,0 +1,2 @@
+# Necessary for docker-desktop, see https://github.com/prometheus-community/helm-charts/issues/467#issuecomment-1059403730
+prometheus_node_exporter_hostRootFsMount: false
