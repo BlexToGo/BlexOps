@@ -1,8 +1,8 @@
-# Playbook to connections, references, variables, etc.
+# Playbook to debug tasks, connections, references, variables, etc.
 ---
 - name: Debug information
   hosts: all
-  #connection: local #can be replaced by adding "localhost ansible_connection=local" to the hosts file
+  tags: info
   tasks:
     - name: Print the ansible hostname
       debug:
@@ -15,9 +15,32 @@
         var: group_names
     - name: ping all hosts
       ping:
+    - name: Check version of community.general
+      debug:
+        msg: "community.general version {{ lookup('community.general.collection_version', 'community.general') }}"
 
-# - name: Display all variables/facts known for a host
-#   hosts: all
-#   tasks:
-#     - debug:
-#         var: hostvars[inventory_hostname]
+- name: Test variable setting
+  hosts: alex-pc
+  tags: vars
+  vars:
+    test_var1: test1
+  tasks:
+
+  - name: Get secret stored in a variable
+    debug:
+      var: test_var1
+
+  - name: test the register parameter
+    debug:
+      msg: test2
+    register: test_var2
+  - name: Get secret stored in a variable
+    debug:
+      var: test_var2
+
+  - name: test setting a fact
+    set_fact:
+      test_var3: test3
+  - name: Get secret stored in a variable
+    debug:
+      var: test_var3
