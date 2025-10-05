@@ -1,0 +1,136 @@
+---
+- name: Deploy test website
+  gather_facts: no
+  hosts: alex-server
+  environment:
+    K8S_AUTH_KUBECONFIG: "{{ k8s_kubeconfig_file }}"
+    K8S_AUTH_CONTEXT: "{{ k8s_context }}"
+  vars:
+    state: present
+
+  tasks:
+    - name: Create a namespace
+      kubernetes.core.k8s:
+        state: "{{state}}"
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: website
+
+    - name: Create ConfigMap with static website content
+      kubernetes.core.k8s:
+        state: "{{state}}"
+        namespace: website
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: website
+          data:
+            index.html: |
+              <!doctype html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <title>BlexOps</title>
+              </head>
+              <body>
+                BlexOps
+              </body>
+              </html>
+
+    - name: Deploy Nginx
+      kubernetes.core.k8s:
+        state: "{{state}}"
+        namespace: website
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: nginx-deployment
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: nginx
+            template:
+              metadata:
+                labels:
+                  app: nginx
+              spec:
+                containers:
+                - name: nginx
+                  image: nginx:latest
+                  ports:
+                  - containerPort: 80
+                  volumeMounts:
+                  - name: website-content
+                    mountPath: /usr/share/nginx/html/website
+                    readOnly: true
+                volumes:
+                - name: website-content
+                  configMap:
+                    name: website
+
+    - name: Create ConfigMap with static website content
+      kubernetes.core.k8s:
+        state: "{{state}}"
+        namespace: website
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: blexops-website
+          data:
+            index.html: |
+              <!doctype html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <title>BlexOps</title>
+              </head>
+              <body>
+                BlexOps
+              </body>
+              </html>
+
+    - name: Add a service for the Nginx deployment
+      kubernetes.core.k8s:
+        state: "{{state}}"
+        namespace: website
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: nginx-service
+          spec:
+            selector:
+              app: nginx
+            ports:
+            - protocol: TCP
+              port: 80
+              targetPort: 80
+            type: NodePort
+
+    - name: Expose Nginx deployment with a ingress
+      kubernetes.core.k8s:
+        state: "{{state}}"
+        namespace: website
+        definition:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: nginx-ingress
+          spec:
+            rules:
+            - host: "{{ ansible_host }}"
+              http:
+                paths:
+                - path: /website
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: nginx-service
+                      port:
+                        number: 80
