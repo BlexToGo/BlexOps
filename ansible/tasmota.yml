@@ -1,0 +1,27 @@
+---
+- name: Get the Tasmota version from a Tasmota device
+  tags: version
+  hosts: tasmota
+  gather_facts: no
+  tasks:
+    - name: Get the firmware info JSON from the Tasmota device
+      uri:
+        url: "http://{{ ansible_host }}/cm?cmnd=Status%202"
+        method: GET
+        return_content: yes
+        timeout: 10
+      register: http_response
+      delegate_to: localhost
+
+    # - name: Print the full http_response for debugging
+    #   debug:
+    #     msg: "{{ http_response }}"
+
+    - name: Print the Tasmota version from the response
+      vars:
+        ip: "{{ ansible_host | default('unknown') }}"
+        hostname: "{{ inventory_hostname }}"
+        version: "{{ http_response.json.StatusFWR.Version if (http_response.json is defined) else 'no-response' }}"
+      debug:
+        msg: "Tasmota version of {{ hostname }} ({{ ip }}): {{ version }}"
+      delegate_to: localhost # optional because debug tasks always run on the control node
