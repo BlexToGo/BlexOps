@@ -1,0 +1,16 @@
+---
+- name: Add Helm repository for Grafana
+  kubernetes.core.helm_repository:
+    name: grafana
+    repo_url: https://grafana.github.io/helm-charts
+
+- name: Deploy Grafana Helm chart
+  kubernetes.core.helm:
+    name: "{{ grafana_release_name }}"
+    update_repo_cache: true
+    chart_ref: grafana/grafana
+    chart_version: "{{ grafana_chart_version }}"
+    release_namespace: "{{ grafana_namespace }}"
+    create_namespace: true
+    values:
+      "{{ grafana_values }}"

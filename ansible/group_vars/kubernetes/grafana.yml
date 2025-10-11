@@ -1,0 +1,52 @@
+---
+grafana_chart_version: 8.10.4
+grafana_host_name: "{{ lookup('community.general.onepassword', 'Grafana', field='hostname', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+prometheus_datasource_url: "{{ lookup('community.general.onepassword', 'Prometheus', field='url', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+
+grafana_values:
+
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s/grafana"
+      serve_from_sub_path: true
+
+  ingress:
+    enabled: true
+    hosts:
+      - "{{ grafana_host_name }}"
+    path: "/grafana"
+
+  persistence:
+    enabled: true
+    type: pvc
+    size: 100Mi
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: "{{ prometheus_datasource_url }}"
+          isDefault: true
+          editable: true
+          jsonData:
+            timeInterval: 5s
+          prometheusType: Prometheus # Mimir
+
+# extraVolumeMounts:
+#   - name: plugins
+#     mountPath: /var/lib/grafana/plugins
+#     subPath: configs/grafana/plugins
+#     readOnly: false
+#   - name: dashboards
+#     mountPath: /var/lib/grafana/dashboards
+#     hostPath: /usr/shared/grafana/dashboards
+#     readOnly: false
+
+# extraVolumes:
+#   - name: plugins
+#     existingClaim: existing-grafana-claim
+#   - name: dashboards
+#     persistentVolumeClaim: grafana-dashboards
