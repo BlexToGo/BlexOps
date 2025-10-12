@@ -20,7 +20,7 @@
         msg: "community.general version {{ lookup('community.general.collection_version', 'community.general') }}"
 
 - name: Get info from k8s cluster
-  hosts: alex-server
+  hosts: kubernetes
   tags: k8s
   environment:
     K8S_AUTH_KUBECONFIG: "{{ k8s_kubeconfig_file }}"
@@ -36,7 +36,7 @@
         msg: "{{ namespaces.resources | map(attribute='metadata.name') | list }}"
 
 - name: Test variable setting
-  hosts: alex-pc
+  hosts: localhost
   tags: vars
   vars:
     test_var1: test1
