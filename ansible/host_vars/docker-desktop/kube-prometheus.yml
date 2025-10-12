@@ -1,2 +1,25 @@
+kube_prometheus_stack_chart_version: 45.9.1
+prometheus_remoteWrite_name: "Grafana Cloud"
+prometheus_remoteWrite_url: "https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push"
+prometheus_remoteWrite:
+  - name: "{{ prometheus_remoteWrite_name }}"
+  - url: "{{ prometheus_remoteWrite_url }}"
 # Necessary for docker-desktop, see https://github.com/prometheus-community/helm-charts/issues/467#issuecomment-1059403730
-prometheus_node_exporter_hostRootFsMount: false
+prometheus_node_exporter_hostRootFsMount: true
+kube_prometheus_stack_values:
+  prometheus:
+    #remoteWrite: "{{ prometheus_remoteWrite }}"
+    remoteWriteDashboards: true
+    serviceMonitorNamespaceSelector:
+      any: true
+    serviceMonitorSelector: {}
+    prometheusSpec:
+      ruleSelectorNilUsesHelmValues: false
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+      probeSelectorNilUsesHelmValues: false
+  prometheus-node-exporter:
+    hostRootFsMount:
+      enabled: "{{ prometheus_node_exporter_hostRootFsMount }}"
+  grafana:
+    defaultDashboardsTimezone: Europe/Berlin
