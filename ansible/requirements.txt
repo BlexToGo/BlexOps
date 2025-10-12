@@ -1,1 +1,6 @@
-kubernetes >= 17.17.0
+# used by the kubernetes.core ansible collection
+kubernetes >= 24.2.0
+PyYAML >= 3.11
+
+# used by ansible vault to increase decryption speed
+cryptography
