@@ -1,0 +1,30 @@
+---
+home_assistant_chart_version: 0.3.31
+home_assistant_host_name: "{{ lookup('community.general.onepassword', 'Home Assistant', field='hostname', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+
+home_assistant_values:
+  controller:
+    type: StatefulSet
+  persistence:
+    enabled: true
+    size: 1Gi
+    annotations:
+      k8up.io/backup: "true"
+  ingress:
+    enabled: true
+    external: false
+    hosts:
+      - host: "{{ home_assistant_host_name }}"
+        paths:
+          - path: "/home-assistant"
+            pathType: Prefix
+  hostPort:
+    enabled: true
+    port: 8124
+  serviceMonitor:
+    enabled: false
+    scrapeInterval: 60s
+  env:
+    - name: MY_TIME_ZONE
+      value: "Europe/Berlin"
+

@@ -1,0 +1,16 @@
+---
+- name: Add Helm repository for Home Assistant
+  kubernetes.core.helm_repository:
+    name: pajikos
+    repo_url: https://pajikos.github.io/home-assistant-helm-chart/
+
+- name: Deploy Home Assistant Helm chart
+  kubernetes.core.helm:
+    name: "{{ home_assistant_release_name }}"
+    update_repo_cache: true
+    chart_ref: pajikos/home-assistant
+    chart_version: "{{ home_assistant_chart_version | default(omit) }}"
+    release_namespace: "{{ home_assistant_namespace }}"
+    create_namespace: true
+    values:
+      "{{ home_assistant_values | default({}) }}"
