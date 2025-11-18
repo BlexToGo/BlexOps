@@ -10,6 +10,15 @@ home_assistant_values:
     size: 1Gi
     annotations:
       k8up.io/backup: "true"
+  additionalVolumes:
+    - hostPath:
+        path: >-
+          /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2695656-if00
+        type: CharDevice
+      name: zigbee
+  additionalMounts:
+    - mountPath: /dev/ttyACM0
+      name: zigbee
   ingress:
     enabled: true
     external: false
@@ -21,6 +30,8 @@ home_assistant_values:
   hostPort:
     enabled: true
     port: 8124
+  securityContext:
+    privileged: true
   serviceMonitor:
     enabled: false
     scrapeInterval: 60s
