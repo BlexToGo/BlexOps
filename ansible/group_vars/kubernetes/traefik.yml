@@ -1,0 +1,60 @@
+---
+traefik_chart_version: 37.4.0
+
+traefik_values:
+  ingressClass:
+    # Use "public" ingressClassName to match existing ingresses
+    name: public
+
+  ingressRoute:
+    dashboard:
+      enabled: true
+      # Expose dashboard on standard web port via hostname
+      entryPoints: ["web"]
+      matchRule: Host(`{{ hostname }}`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+
+  service:
+    type: NodePort
+
+  # Use host network to bind directly to node ports 80/443
+  # This allows direct access via hostname without port numbers
+  hostNetwork: true
+  
+  # Use Recreate strategy to avoid port conflicts during updates
+  deployment:
+    kind: Deployment
+    replicas: 1
+  updateStrategy:
+    type: Recreate
+  
+  ports:
+    web:
+      port: 80
+      exposedPort: 80
+    websecure:
+      port: 443
+      exposedPort: 443
+
+  # Pod security context - must run as root when using hostNetwork with ports < 1024
+  podSecurityContext:
+    runAsNonRoot: false
+    runAsUser: 0
+
+  # Container security context - allow container to bind to privileged ports
+  securityContext:
+    capabilities:
+      add: [NET_BIND_SERVICE]
+
+  logs:
+    access:
+      enabled: true
+      timezone: "Europe/Berlin"
+
+  # Enable Prometheus metrics
+  # metrics:
+  #   prometheus:
+  #     service:
+  #       enabled: true
+  #     serviceMonitor:
+  #       enabled: true
+  #       scrapeInterval: 60s
