@@ -1,6 +1,5 @@
 ---
 grafana_chart_version: 8.10.4
-grafana_host_name: "{{ lookup('community.general.onepassword', 'Grafana', field='hostname', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
 prometheus_datasource_url: "{{ lookup('community.general.onepassword', 'Prometheus', field='url', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
 
 grafana_values:
@@ -13,7 +12,7 @@ grafana_values:
   ingress:
     enabled: true
     hosts:
-      - "{{ grafana_host_name }}"
+      - "{{ hostname }}"
     path: "/grafana"
 
   persistence:

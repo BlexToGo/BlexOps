@@ -124,7 +124,7 @@
             name: nginx-ingress
           spec:
             rules:
-            - host: "{{ ansible_host }}"
+            - host: "{{ hostname }}"
               http:
                 paths:
                 - path: /website

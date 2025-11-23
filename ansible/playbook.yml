@@ -4,8 +4,6 @@
   environment:
     K8S_AUTH_KUBECONFIG: "{{ k8s_kubeconfig_file }}"
     K8S_AUTH_CONTEXT: "{{ k8s_context }}"
-  vars:
-    hostname: "{{ lookup('community.general.onepassword', 'Server', field='hostname', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
   roles:
     - role: traefik
       tags: ingress

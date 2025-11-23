@@ -1,0 +1,2 @@
+---
+hostname: "{{ lookup('community.general.onepassword', 'Server', field='hostname', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"

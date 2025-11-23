@@ -1,6 +1,5 @@
 ---
 home_assistant_chart_version: 0.3.31
-home_assistant_host_name: "{{ lookup('community.general.onepassword', 'Home Assistant', field='hostname', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
 
 home_assistant_values:
   controller:
@@ -23,7 +22,7 @@ home_assistant_values:
     enabled: true
     external: false
     hosts:
-      - host: "{{ home_assistant_host_name }}"
+      - host: "{{ hostname }}"
         paths:
           - path: "/home-assistant"
             pathType: Prefix
