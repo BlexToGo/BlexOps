@@ -11,3 +11,5 @@
       tags: monitoring
     - role: home-assistant
       tags: home-automation
+    - role: languagetool
+      tags: languagetool

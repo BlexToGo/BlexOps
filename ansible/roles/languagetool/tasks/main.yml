@@ -1,0 +1,112 @@
+---
+- name: Create LanguageTool namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ languagetool_namespace }}"
+
+- name: Deploy LanguageTool server
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: languagetool
+        namespace: "{{ languagetool_namespace }}"
+        labels:
+          app: languagetool
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: languagetool
+        template:
+          metadata:
+            labels:
+              app: languagetool
+          spec:
+            containers:
+              - name: languagetool
+                image: "{{ languagetool_image }}:{{ languagetool_image_tag }}"
+                ports:
+                  - containerPort: 8010
+                    hostPort: "{{ languagetool_port }}"
+                    protocol: TCP
+                readinessProbe:
+                  httpGet:
+                    path: /v2/languages
+                    port: 8010
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                livenessProbe:
+                  httpGet:
+                    path: /v2/languages
+                    port: 8010
+                  initialDelaySeconds: 60
+                  periodSeconds: 30
+                resources:
+                  requests:
+                    memory: 768Mi
+                    cpu: 250m
+                  limits:
+                    memory: 2Gi
+            restartPolicy: Always
+
+- name: Create LanguageTool service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: languagetool
+        namespace: "{{ languagetool_namespace }}"
+        labels:
+          app: languagetool
+      spec:
+        selector:
+          app: languagetool
+        ports:
+          - port: 8010
+            targetPort: 8010
+            protocol: TCP
+
+- name: Wait for LanguageTool deployment to be ready
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: languagetool
+    namespace: "{{ languagetool_namespace }}"
+  register: languagetool_deployment
+  until:
+    - languagetool_deployment.resources | length > 0
+    - languagetool_deployment.resources[0].status.readyReplicas | default(0) >= 1
+  retries: 30
+  delay: 10
+
+- name: Test LanguageTool API endpoint
+  ansible.builtin.uri:
+    url: "http://{{ hostname }}:{{ languagetool_port }}/v2/check"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      language: en-US
+      text: a simple test
+    return_content: true
+    status_code: 200
+  register: languagetool_test
+  retries: 5
+  delay: 10
+
+- name: Verify LanguageTool test response
+  ansible.builtin.assert:
+    that:
+      - "'matches' in languagetool_test.json"
+    fail_msg: "LanguageTool API did not return expected response"
+    success_msg: "LanguageTool API is responding correctly"

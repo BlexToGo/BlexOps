@@ -1,0 +1,5 @@
+---
+languagetool_namespace: languagetool
+languagetool_image: erikvl87/languagetool
+languagetool_image_tag: 6.7-dockerupdate-3
+languagetool_port: 8010
