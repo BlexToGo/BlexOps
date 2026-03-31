@@ -6,14 +6,20 @@ grafana_values:
 
   grafana.ini:
     server:
-      root_url: "%(protocol)s://%(domain)s/grafana"
-      serve_from_sub_path: true
+      root_url: "%(protocol)s://%(domain)s/"
 
   ingress:
     enabled: true
+    ingressClassName: public
+    annotations:
+      cert-manager.io/cluster-issuer: "{{ cert_manager_cluster_issuer_name }}"
     hosts:
-      - "{{ hostname }}"
-    path: "/grafana"
+      - "grafana.{{ domain_name }}"
+    path: "/"
+    tls:
+      - secretName: grafana-tls
+        hosts:
+          - "grafana.{{ domain_name }}"
 
   persistence:
     enabled: true

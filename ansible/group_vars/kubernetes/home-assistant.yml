@@ -21,11 +21,17 @@ home_assistant_values:
   ingress:
     enabled: true
     external: false
+    annotations:
+      cert-manager.io/cluster-issuer: "{{ cert_manager_cluster_issuer_name }}"
     hosts:
-      - host: "{{ hostname }}"
+      - host: "hass.{{ domain_name }}"
         paths:
-          - path: "/home-assistant"
+          - path: "/"
             pathType: Prefix
+    tls:
+      - secretName: home-assistant-tls
+        hosts:
+          - "hass.{{ domain_name }}"
   hostPort:
     enabled: true
     port: 8124
@@ -37,4 +43,9 @@ home_assistant_values:
   env:
     - name: MY_TIME_ZONE
       value: "Europe/Berlin"
+  configuration:
+    enabled: true
+    forceInit: true
+    trusted_proxies:
+      - 10.0.0.0/8
 

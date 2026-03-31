@@ -1,0 +1,5 @@
+---
+cert_manager_release_name: cert-manager
+cert_manager_namespace: cert-manager
+cert_manager_cluster_issuer_name: letsencrypt
+cert_manager_acme_email: ""

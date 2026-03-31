@@ -1,0 +1,44 @@
+cert_manager_chart_version: v1.19.4
+
+cert_manager_acme_email: "{{ lookup('community.general.onepassword', 'ACME', field='email', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+cert_manager_cloudflare_api_token: "{{ lookup('community.general.onepassword', 'Cloudflare', section='tokens', field='cert-manager', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+
+cert_manager_values:
+  crds:
+    enabled: true
+    keep: true
+
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
+  webhook:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
+
+  cainjector:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 128Mi
+
+  startupapicheck:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
