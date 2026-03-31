@@ -1,0 +1,105 @@
+---
+# --- Tunnel provisioning via Cloudflare API ---
+
+- name: Check for existing Cloudflare Tunnel
+  ansible.builtin.uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/cfd_tunnel?name={{ cloudflare_tunnel_name }}&is_deleted=false"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+  register: _cf_tunnel_list
+
+- name: Create Cloudflare Tunnel
+  ansible.builtin.uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/cfd_tunnel"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+    body_format: json
+    body:
+      name: "{{ cloudflare_tunnel_name }}"
+      config_src: "cloudflare"
+    status_code: 200
+  register: _cf_tunnel_created
+  when: _cf_tunnel_list.json.result | length == 0
+  no_log: true
+
+- name: Set tunnel ID
+  ansible.builtin.set_fact:
+    _cf_tunnel_id: >-
+      {{ (_cf_tunnel_list.json.result | first).id
+         if _cf_tunnel_list.json.result | length > 0
+         else _cf_tunnel_created.json.result.id }}
+
+- name: Get tunnel token
+  ansible.builtin.uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/cfd_tunnel/{{ _cf_tunnel_id }}/token"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+  register: _cf_tunnel_token
+  no_log: true
+
+# --- Tunnel ingress configuration ---
+
+- name: Configure tunnel ingress rules
+  ansible.builtin.uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/cfd_tunnel/{{ _cf_tunnel_id }}/configurations"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+    body_format: json
+    body:
+      config:
+        ingress: "{{ cloudflare_tunnel_ingress }}"
+    status_code: 200
+
+# --- DNS record creation ---
+
+- name: Check existing DNS records
+  ansible.builtin.uri:
+    url: "https://api.cloudflare.com/client/v4/zones/{{ cloudflare_zone_id }}/dns_records?type=CNAME&name={{ item.hostname }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+  register: _cf_dns_check
+  loop: "{{ cloudflare_tunnel_ingress | selectattr('hostname', 'defined') | list }}"
+
+- name: Create DNS CNAME records
+  ansible.builtin.uri:
+    url: "https://api.cloudflare.com/client/v4/zones/{{ cloudflare_zone_id }}/dns_records"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+    body_format: json
+    body:
+      type: CNAME
+      proxied: true
+      name: "{{ item.item.hostname }}"
+      content: "{{ _cf_tunnel_id }}.cfargotunnel.com"
+    status_code: 200
+  loop: "{{ _cf_dns_check.results }}"
+  when: item.json.result | length == 0
+
+# --- Helm chart deployment ---
+
+- name: Add Helm repository for Cloudflare Tunnel
+  kubernetes.core.helm_repository:
+    name: wrsys
+    repo_url: https://wrsys.github.io/helm-charts/
+
+- name: Deploy Cloudflare Tunnel Helm chart
+  kubernetes.core.helm:
+    name: "{{ cloudflare_tunnel_release_name }}"
+    update_repo_cache: true
+    chart_ref: wrsys/cloudflare-tunnel-remote
+    chart_version: "{{ cloudflare_tunnel_chart_version }}"
+    release_namespace: "{{ cloudflare_tunnel_namespace }}"
+    create_namespace: true
+    values:
+      cloudflare:
+        tunnel_token: "{{ _cf_tunnel_token.json.result }}"
+      replicaCount: "{{ cloudflare_tunnel_replicas }}"
+      image:
+        tag: "{{ cloudflare_tunnel_image_tag }}"
+  no_log: true

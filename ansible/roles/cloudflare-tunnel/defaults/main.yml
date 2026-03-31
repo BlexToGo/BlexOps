@@ -1,0 +1,4 @@
+---
+cloudflare_tunnel_release_name: cloudflare-tunnel
+cloudflare_tunnel_namespace: cloudflare-tunnel
+cloudflare_tunnel_replicas: 2

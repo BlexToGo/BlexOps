@@ -1,0 +1,17 @@
+---
+cloudflare_tunnel_chart_version: 0.10.0
+cloudflare_tunnel_image_tag: 2026.3.0
+cloudflare_tunnel_name: blex-cluster
+
+cloudflare_api_token: "{{ lookup('community.general.onepassword', 'Cloudflare', section='tokens', field='cloudflare-tunnel', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+cloudflare_account_id: "{{ lookup('community.general.onepassword', 'Cloudflare', field='account id', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+cloudflare_zone_id: "{{ lookup('community.general.onepassword', 'Cloudflare', field='zone id', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+
+cloudflare_tunnel_ingress:
+  - hostname: "grafana.{{ domain_name }}"
+    service: "http://grafana.monitoring.svc.cluster.local:80"
+    originRequest: {}
+  - hostname: "hass.{{ domain_name }}"
+    service: "http://home-assistant.home-automation.svc.cluster.local:8080"
+    originRequest: {}
+  - service: "http_status:404"
