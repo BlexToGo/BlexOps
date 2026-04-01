@@ -1,0 +1,4 @@
+---
+vlogs_release_name: vlogs
+vlogs_collector_release_name: vlogs-collector
+vlogs_namespace: logging

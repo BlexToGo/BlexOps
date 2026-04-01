@@ -1,0 +1,27 @@
+---
+- name: Add Helm repository for VictoriaMetrics
+  kubernetes.core.helm_repository:
+    name: vm
+    repo_url: https://victoriametrics.github.io/helm-charts/
+
+- name: Deploy VictoriaLogs Single Helm chart
+  kubernetes.core.helm:
+    name: "{{ vlogs_release_name }}"
+    update_repo_cache: true
+    chart_ref: vm/victoria-logs-single
+    chart_version: "{{ vlogs_chart_version }}"
+    release_namespace: "{{ vlogs_namespace }}"
+    create_namespace: true
+    values:
+      "{{ vlogs_values }}"
+
+- name: Deploy VictoriaLogs Collector Helm chart
+  kubernetes.core.helm:
+    name: "{{ vlogs_collector_release_name }}"
+    update_repo_cache: true
+    chart_ref: vm/victoria-logs-collector
+    chart_version: "{{ vlogs_collector_chart_version }}"
+    release_namespace: "{{ vlogs_namespace }}"
+    create_namespace: true
+    values:
+      "{{ vlogs_collector_values }}"

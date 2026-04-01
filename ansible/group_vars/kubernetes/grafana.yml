@@ -7,6 +7,9 @@ grafana_values:
     server:
       root_url: "%(protocol)s://%(domain)s/"
 
+  plugins:
+    - victoriametrics-logs-datasource
+
   ingress:
     enabled: true
     ingressClassName: public
@@ -35,6 +38,7 @@ grafana_values:
       label: grafana_dashboard
       labelValue: "1"
       folderAnnotation: grafana_folder
+      searchNamespace: ALL
       provider:
         foldersFromFilesStructure: true
 
@@ -51,6 +55,12 @@ grafana_values:
           jsonData:
             timeInterval: 30s
           prometheusType: Prometheus
+        - name: VictoriaLogs
+          type: victoriametrics-logs-datasource
+          access: proxy
+          url: "http://vlogs-victoria-logs-single-server.logging.svc:9428"
+          isDefault: false
+          editable: true
 
 # extraVolumeMounts:
 #   - name: plugins

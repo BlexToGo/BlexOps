@@ -1,0 +1,36 @@
+---
+vlogs_chart_version: 0.11.30
+vlogs_collector_chart_version: 0.2.14
+
+vlogs_values:
+
+  server:
+    retentionPeriod: 30d
+    persistentVolume:
+      size: 50Gi
+    vmServiceScrape:
+      enabled: true
+  
+  dashboards:
+    enabled: true
+    labels:
+      grafana_dashboard: "1"
+    annotations:
+      grafana_folder: "VictoriaLogs"
+
+
+vlogs_collector_values:
+
+  remoteWrite:
+    - url: "http://vlogs-victoria-logs-single-server.logging.svc:9428"
+
+  collector:
+    # LogsQL filter to exclude specific containers/namespaces before reading log files.
+    # Examples:
+    #   Exclude by namespace: "kubernetes.pod_namespace:in(kube-system)"
+    #   Exclude by annotation: "kubernetes.pod_annotations.victoriametrics.com/vlagent/exclude:=true"
+    excludeFilter: "kubernetes.container_name:in(hostpath-provisioner)"
+
+  podMonitor:
+    enabled: true
+    vm: true
