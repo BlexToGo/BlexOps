@@ -34,6 +34,9 @@ traefik_values:
     websecure:
       port: 443
       exposedPort: 443
+    metrics:
+      port: 9101
+      exposedPort: 9101
 
   # Pod security context - must run as root when using hostNetwork with ports < 1024
   podSecurityContext:
