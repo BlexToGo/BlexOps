@@ -11,6 +11,8 @@
       tags: ingress
     - role: cloudflare-tunnel
       tags: cloudflare-tunnel
+    - role: prometheus-operator-crds
+      tags: monitoring
     - role: victoria-metrics
       tags: monitoring
     - role: grafana

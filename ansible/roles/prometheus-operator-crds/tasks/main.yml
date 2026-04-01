@@ -1,0 +1,8 @@
+---
+- name: Deploy Prometheus Operator CRDs Helm chart
+  kubernetes.core.helm:
+    name: "{{ prometheus_operator_crds_release_name }}"
+    chart_ref: oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
+    chart_version: "{{ prometheus_operator_crds_chart_version }}"
+    release_namespace: "{{ prometheus_operator_crds_namespace }}"
+    create_namespace: true
