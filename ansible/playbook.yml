@@ -11,6 +11,8 @@
       tags: ingress
     - role: cloudflare-tunnel
       tags: cloudflare-tunnel
+    - role: victoria-metrics
+      tags: monitoring
     - role: grafana
       tags: monitoring
     - role: home-assistant

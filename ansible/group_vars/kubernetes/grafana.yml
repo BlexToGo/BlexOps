@@ -1,6 +1,5 @@
 ---
 grafana_chart_version: 8.10.4
-prometheus_datasource_url: "{{ lookup('community.general.onepassword', 'Prometheus', field='url', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
 
 grafana_values:
 
@@ -26,19 +25,32 @@ grafana_values:
     type: pvc
     size: 100Mi
 
+  sidecar:
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true
+
   datasources:
     datasources.yaml:
       apiVersion: 1
       datasources:
-        - name: Prometheus
+        - name: VictoriaMetrics
           type: prometheus
           access: proxy
-          url: "{{ prometheus_datasource_url }}"
+          url: "http://vmsingle-vmstack-vmks.monitoring.svc:8428"
           isDefault: true
           editable: true
           jsonData:
-            timeInterval: 5s
-          prometheusType: Prometheus # Mimir
+            timeInterval: 30s
+          prometheusType: Prometheus
 
 # extraVolumeMounts:
 #   - name: plugins

@@ -1,0 +1,16 @@
+---
+- name: Add Helm repository for VictoriaMetrics
+  kubernetes.core.helm_repository:
+    name: vm
+    repo_url: https://victoriametrics.github.io/helm-charts/
+
+- name: Deploy VictoriaMetrics K8s Stack Helm chart
+  kubernetes.core.helm:
+    name: "{{ victoria_metrics_release_name }}"
+    update_repo_cache: true
+    chart_ref: vm/victoria-metrics-k8s-stack
+    chart_version: "{{ victoria_metrics_chart_version }}"
+    release_namespace: "{{ victoria_metrics_namespace }}"
+    create_namespace: true
+    values:
+      "{{ victoria_metrics_values }}"
