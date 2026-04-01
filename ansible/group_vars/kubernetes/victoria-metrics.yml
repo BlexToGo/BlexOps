@@ -20,6 +20,11 @@ victoria_metrics_values:
 
   defaultDashboards:
     enabled: true
+    defaultTimezone: Europe/Berlin
+    annotations:
+      grafana_folder: "VictoriaMetrics"
+    victoriametrics-vmalert:
+      enabled: false
 
   defaultRules:
     create: true
