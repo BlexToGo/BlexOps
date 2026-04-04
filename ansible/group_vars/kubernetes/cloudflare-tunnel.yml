@@ -1,5 +1,4 @@
 ---
-cloudflare_tunnel_chart_version: 0.10.0
 cloudflare_tunnel_image_tag: 2026.3.0
 cloudflare_tunnel_name: blex-cluster
 
