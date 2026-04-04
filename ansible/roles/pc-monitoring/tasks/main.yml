@@ -1,0 +1,20 @@
+---
+- name: Deploy VMStaticScrape for {{ item.job_name }}
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operator.victoriametrics.com/v1beta1
+      kind: VMStaticScrape
+      metadata:
+        name: "{{ item.job_name | replace('_', '-') }}"
+        namespace: "{{ pc_monitoring_namespace }}"
+      spec:
+        jobName: "{{ item.job_name }}"
+        targetEndpoints:
+          - targets:
+              - "{{ pc_monitoring_hostname }}:{{ item.port }}"
+            interval: "{{ item.scrape_interval | default('30s') }}"
+            path: "{{ item.metrics_path | default('/metrics') }}"
+  loop: "{{ pc_monitoring_scrapes }}"
+  loop_control:
+    label: "{{ item.job_name }}"

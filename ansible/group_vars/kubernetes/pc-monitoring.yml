@@ -1,0 +1,14 @@
+---
+pc_monitoring_hostname: "{{ lookup('community.general.onepassword', 'PC', field='hostname', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+
+pc_monitoring_scrapes:
+
+  - job_name: windows_exporter
+    port: 9182
+    scrape_interval: 15s
+    metrics_path: /metrics
+
+  - job_name: ohm_graphite
+    port: 4445
+    scrape_interval: 5s
+    metrics_path: /metrics

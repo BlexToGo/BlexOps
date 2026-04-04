@@ -17,6 +17,8 @@
       tags: monitoring
     - role: grafana
       tags: monitoring
+    - role: pc-monitoring
+      tags: monitoring
     - role: vlogs
       tags: logging
     - role: home-assistant
