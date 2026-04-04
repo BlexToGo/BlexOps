@@ -51,6 +51,7 @@ victoria_metrics_values:
     enabled: true
     operator:
       disable_prometheus_converter: false
+      enable_converter_ownership: true # will remove corresponding victoria-metrics CRs when the prometheus ones are deleted
 
   alertmanager:
     enabled: false
