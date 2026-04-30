@@ -50,7 +50,7 @@ grafana_values:
           type: prometheus
           access: proxy
           url: "http://vmsingle-vmstack-vmks.monitoring.svc:8428"
-          isDefault: true
+          isDefault: false
           editable: true
           jsonData:
             timeInterval: 30s
