@@ -1,11 +1,37 @@
 ---
 grafana_chart_version: 8.10.4
 
+# --- Cloudflare Access auth (auth.proxy) ---
+# Cloudflare Access authenticates users at the edge (Google OAuth) and sets
+# the Cf-Access-Authenticated-User-Email header. Grafana trusts this header
+# via auth.proxy, which also creates proper session cookies.
+# Access apps, policies, and the Google IdP are managed by OpenTofu
+# (see /tofu/cloudflare.tf). The team name is read from 1Password.
+grafana_cloudflare_access_team_name: "{{ lookup('community.general.onepassword', 'Cloudflare', field='team name', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+
 grafana_values:
 
   grafana.ini:
     server:
-      root_url: "%(protocol)s://%(domain)s/"
+      root_url: "https://grafana.{{ domain_name }}/"
+    auth:
+      # Cloudflare Access already authenticated the user; hide Grafana's own
+      # login form and signout (Cloudflare manages the session).
+      disable_login_form: true
+      disable_signout_menu: false
+      signout_redirect_url: "https://{{ grafana_cloudflare_access_team_name }}.cloudflareaccess.com/cdn-cgi/access/logout"
+    auth.basic:
+      enabled: false
+    auth.anonymous:
+      enabled: false
+    auth.proxy:
+      enabled: true
+      header_name: Cf-Access-Authenticated-User-Email
+      header_property: email
+      auto_sign_up: true
+      # No session tokens needed — every request is authenticated by the
+      # Cf-Access-Authenticated-User-Email header via Cloudflare Access.
+      enable_login_token: false
 
   plugins:
     - victoriametrics-logs-datasource
