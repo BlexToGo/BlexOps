@@ -4,6 +4,36 @@
     name: grafana
     repo_url: https://grafana.github.io/helm-charts
 
+- name: Create Grafana admin credentials Secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: grafana-admin-credentials
+        namespace: "{{ grafana_namespace }}"
+      type: Opaque
+      stringData:
+        admin-user: "{{ grafana_admin_username }}"
+        admin-password: "{{ grafana_admin_password }}"
+
+- name: Create Grafana PVC
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: grafana
+        namespace: "{{ grafana_namespace }}"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
+
 - name: Deploy Grafana Helm chart
   kubernetes.core.helm:
     name: "{{ grafana_release_name }}"
