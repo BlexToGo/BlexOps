@@ -24,14 +24,14 @@ home_assistant_values:
     annotations:
       cert-manager.io/cluster-issuer: "{{ cert_manager_cluster_issuer_name }}"
     hosts:
-      - host: "hass.{{ domain_name }}"
+      - host: "ha.{{ domain_name }}"
         paths:
           - path: "/"
             pathType: Prefix
     tls:
       - secretName: home-assistant-tls
         hosts:
-          - "hass.{{ domain_name }}"
+          - "ha.{{ domain_name }}"
   hostPort:
     enabled: true
     port: 8124
