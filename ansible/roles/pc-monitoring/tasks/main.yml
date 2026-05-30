@@ -1,5 +1,5 @@
 ---
-- name: Deploy VMStaticScrape for {{ item.job_name }}
+- name: Deploy VMStaticScrapes
   kubernetes.core.k8s:
     state: present
     definition:
