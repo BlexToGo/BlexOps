@@ -37,6 +37,7 @@ grafana_values:
       header_name: Cf-Access-Authenticated-User-Email
       header_property: email
       auto_sign_up: true
+      auto_assign_org_role: Admin
       # No session tokens needed — every request is authenticated by the
       # Cf-Access-Authenticated-User-Email header via Cloudflare Access.
       enable_login_token: false
