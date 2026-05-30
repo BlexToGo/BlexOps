@@ -63,6 +63,19 @@ grafana_values:
     type: pvc
     existingClaim: grafana
 
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
   sidecar:
     datasources:
       enabled: true
@@ -76,6 +89,27 @@ grafana_values:
       searchNamespace: ALL
       provider:
         foldersFromFilesStructure: true
+
+  dashboards:
+    default:
+      ohm-windows-desktop:
+        gnetId: 11587
+        revision: 14
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
+      windows-exporter:
+        gnetId: 23942
+        revision: 1
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
+      cloudflare-tunnel:
+        gnetId: 24874
+        revision: 1
+        datasource:
+          - name: DS_PROMETHEUS
+            value: VictoriaMetrics
 
   datasources:
     datasources.yaml:
