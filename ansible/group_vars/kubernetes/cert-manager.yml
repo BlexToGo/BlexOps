@@ -1,5 +1,5 @@
 # renovate: helm-chart=cert-manager registryUrl=https://charts.jetstack.io
-cert_manager_chart_version: v1.19.4
+cert_manager_chart_version: v1.20.2
 
 cert_manager_acme_email: "{{ lookup('community.general.onepassword', 'ACME', field='email', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
 cert_manager_cloudflare_api_token: "{{ lookup('community.general.onepassword', 'Cloudflare', section='tokens', field='cert-manager', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
