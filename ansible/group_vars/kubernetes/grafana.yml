@@ -1,5 +1,5 @@
 ---
-grafana_chart_version: 8.10.4
+grafana_chart_version: 11.6.1
 
 grafana_admin_username: "{{ lookup('community.general.onepassword', 'Grafana', field='username', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
 grafana_admin_password: "{{ lookup('community.general.onepassword', 'Grafana', field='password', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
@@ -58,6 +58,15 @@ grafana_values:
         hosts:
           - "grafana.{{ domain_name }}"
 
+  securityContext:
+    runAsUser: 472
+    runAsGroup: 472
+    # set group ownership of the Grafana data directory to Grafana's uid/gid 472 so that Grafana can write to it when running as non-root
+    fsGroup: 472
+
+  initChownData:
+    enabled: false
+
   persistence:
     enabled: true
     type: pvc
@@ -77,10 +86,15 @@ grafana_values:
             path: /var/lib/grafana/dashboards/default
 
   sidecar:
+    # Disable tls verification for sidecar api calls to avoid certificate verification errors because python 3.14 (used in the kiwigrid/k8s-sidecar) enforces stricter SSL validation on the Kubernetes API server CA cert
+    skipTlsVerify: true
     datasources:
       enabled: true
       label: grafana_datasource
       labelValue: "1"
+      env:
+        # Change the health endpoint port of the kiwigrid/k8s-sidecar because both try to bind the same port
+        HEALTH_PORT: 8081
     dashboards:
       enabled: true
       label: grafana_dashboard
@@ -89,6 +103,22 @@ grafana_values:
       searchNamespace: ALL
       provider:
         foldersFromFilesStructure: true
+      env:
+        # Change the health endpoint port of the kiwigrid/k8s-sidecar because both try to bind the same port
+        HEALTH_PORT: 8082
+    # The probes are currently exec probes because at the moment the grafana helm chart (grafana-11.6.1) only supports uniform liveness/readiness probes for all sidecars which we can't use because the sidecars need to have different ports for their health checks or one will fail to bind the port and silently crash
+    livenessProbe:
+      exec:
+        command: ["/bin/sh", "-c", "wget -q -O- http://localhost:$HEALTH_PORT/healthz"]
+      initialDelaySeconds: 15
+      periodSeconds: 30
+      failureThreshold: 3
+    readinessProbe:
+      exec:
+        command: ["/bin/sh", "-c", "wget -q -O- http://localhost:$HEALTH_PORT/healthz"]
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
 
   dashboards:
     default:
