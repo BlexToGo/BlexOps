@@ -12,6 +12,6 @@ cloudflare_tunnel_ingress:
     service: "http://grafana.monitoring.svc.cluster.local:80"
     originRequest: {}
   - hostname: "ha.{{ domain_name }}"
-    service: "http://home-assistant.home-automation.svc.cluster.local:8080"
+    service: "http://home-assistant.home-assistant.svc.cluster.local:8080"
     originRequest: {}
   - service: "http_status:404"

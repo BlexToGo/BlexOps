@@ -22,6 +22,6 @@
     - role: vlogs
       tags: logging
     - role: home-assistant
-      tags: home-automation
+      tags: home-assistant
     - role: languagetool
       tags: languagetool
