@@ -1,0 +1,54 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Docker image tags in Ansible YAML files",
+      "fileMatch": [
+        "ansible/group_vars/.+\\.yml$",
+        "ansible/roles/.+/defaults/main\\.yml$"
+      ],
+      "matchStrings": [
+        "# renovate: image=(?<depName>[^\\s]+?)\\n\\s*\\w+_image_tag:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Helm chart versions in Ansible YAML files",
+      "fileMatch": [
+        "ansible/group_vars/.+\\.yml$",
+        "ansible/roles/.+/defaults/main\\.yml$"
+      ],
+      "matchStrings": [
+        "# renovate: helm-chart=(?<depName>[^\\s]+?) registryUrl=(?<registryUrl>[^\\s]+?)\\n\\s*\\w+_chart_version:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "datasourceTemplate": "helm"
+    },
+    {
+      "customType": "regex",
+      "description": "OCI Helm chart versions in Ansible YAML files",
+      "fileMatch": [
+        "ansible/group_vars/.+\\.yml$",
+        "ansible/roles/.+/defaults/main\\.yml$"
+      ],
+      "matchStrings": [
+        "# renovate: oci-helm=(?<packageName>[^\\s]+?)\\n\\s*\\w+_chart_version:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Group all Helm chart updates",
+      "matchDatasources": ["helm"],
+      "groupName": "helm charts"
+    },
+    {
+      "description": "Group all Docker image tag updates",
+      "matchDatasources": ["docker"],
+      "groupName": "docker images"
+    }
+  ]
+}

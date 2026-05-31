@@ -1,4 +1,5 @@
 ---
+# renovate: helm-chart=home-assistant registryUrl=https://pajikos.github.io/home-assistant-helm-chart/
 home_assistant_chart_version: 0.3.32
 
 home_assistant_values:

@@ -1,4 +1,5 @@
 ---
+# renovate: oci-helm=ghcr.io/grafana-community/helm-charts/grafana
 grafana_chart_version: 11.6.1
 
 grafana_admin_username: "{{ lookup('community.general.onepassword', 'Grafana', field='username', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"

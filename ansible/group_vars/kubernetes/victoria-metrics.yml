@@ -1,4 +1,5 @@
 ---
+# renovate: helm-chart=victoria-metrics-k8s-stack registryUrl=https://victoriametrics.github.io/helm-charts/
 victoria_metrics_chart_version: 0.72.5
 
 victoria_metrics_values:
