@@ -39,16 +39,5 @@
       "datasourceTemplate": "docker"
     }
   ],
-  "packageRules": [
-    {
-      "description": "Group all Helm chart updates",
-      "matchDatasources": ["helm"],
-      "groupName": "helm charts"
-    },
-    {
-      "description": "Group all Docker image tag updates",
-      "matchDatasources": ["docker"],
-      "groupName": "docker images"
-    }
-  ]
+  "separateMajorMinor": true
 }
