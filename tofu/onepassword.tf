@@ -36,6 +36,7 @@ locals {
   ]...)
 
   cloudflare_account_id = lookup(local._cf_fields, "account id", "")
+  cloudflare_zone_id    = lookup(local._cf_fields, "zone id", "")
   access_admin_email    = lookup(local._cf_fields, "admin email", "")
   domain_name           = lookup(local._server_fields, "domain name", "")
   google_client_id      = lookup(local._google_oauth_fields, "client id", "")
@@ -57,12 +58,6 @@ resource "onepassword_item" "access_auds" {
       label = "grafana aud"
       type  = "STRING"
       value = cloudflare_zero_trust_access_application.apps["grafana"].aud
-    }
-
-    field {
-      label = "ha aud"
-      type  = "STRING"
-      value = cloudflare_zero_trust_access_application.apps["ha"].aud
     }
   }
 }
