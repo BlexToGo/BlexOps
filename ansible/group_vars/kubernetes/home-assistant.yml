@@ -39,8 +39,8 @@ home_assistant_values:
   securityContext:
     privileged: true
   serviceMonitor:
-    enabled: false
-    scrapeInterval: 60s
+    enabled: true
+    scrapeInterval: 30s
   env:
     - name: MY_TIME_ZONE
       value: "Europe/Berlin"
