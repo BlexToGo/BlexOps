@@ -50,6 +50,17 @@ home_assistant_values:
     trusted_proxies:
       - 10.0.0.0/8
     templateConfig: |
+      homeassistant:
+        name: Home
+        unit_system: metric
+        currency: EUR
+        language: en
+        country: DE
+        temperature_unit: C
+        time_zone: "Europe/Berlin"
+        internal_url: "http://{{ hostname }}:8124"
+        external_url: "https://ha.{{ domain_name }}"
+
       default_config:
 
       http:
@@ -61,6 +72,10 @@ home_assistant_values:
 
       frontend:
         themes: !include_dir_merge_named themes
+
+      prometheus:
+        namespace: ha
+        requires_auth: false
 
       automation: !include automations.yaml
       script: !include scripts.yaml
