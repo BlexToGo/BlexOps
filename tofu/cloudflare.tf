@@ -66,3 +66,27 @@ resource "cloudflare_ruleset" "ha_rate_limit" {
     }
   }]
 }
+
+# WAF custom rules
+resource "cloudflare_ruleset" "waf_custom" {
+  zone_id = local.cloudflare_zone_id
+  name    = "default"
+  kind    = "zone"
+  phase   = "http_request_firewall_custom"
+
+  rules = [
+    {
+      ref         = "[CF AI Audit]"
+      description = "AI Crawl Control - Block AI bots by User Agent"
+      expression  = "(http.request.uri.path ne \"/robots.txt\" and ((http.user_agent contains \"Applebot\") or (http.user_agent contains \"archive.org_bot\") or (http.user_agent contains \"bingbot\") or (http.user_agent contains \"ChatGPT-User\") or (http.user_agent contains \"ClaudeBot\") or (http.user_agent contains \"Claude-SearchBot\") or (http.user_agent contains \"DuckAssistBot\") or (http.user_agent contains \"Googlebot\") or (http.user_agent contains \"Manus-User\") or (http.user_agent contains \"meta-externalfetcher\") or (http.user_agent contains \"MistralAI-User\") or (http.user_agent contains \"OAI-SearchBot\") or (http.user_agent contains \"Perplexity-User\") or (http.user_agent contains \"PerplexityBot\") or (http.user_agent contains \"ProRataInc\") or (http.user_agent contains \"Terracotta\")))"
+      action      = "block"
+      enabled     = true
+    },
+    {
+      description = "Block WordPress and CMS scanner paths"
+      expression  = "(http.request.uri.path contains \"wlwmanifest.xml\" or http.request.uri.path contains \"xmlrpc.php\" or http.request.uri.path contains \"wp-login.php\" or http.request.uri.path contains \"wp-admin\")"
+      action      = "block"
+      enabled     = true
+    },
+  ]
+}
