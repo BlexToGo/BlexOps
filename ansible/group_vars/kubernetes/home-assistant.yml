@@ -19,20 +19,20 @@ home_assistant_values:
   additionalMounts:
     - mountPath: /dev/ttyACM0
       name: zigbee
-  ingress:
-    enabled: true
-    external: false
-    annotations:
-      cert-manager.io/cluster-issuer: "{{ cert_manager_cluster_issuer_name }}"
-    hosts:
-      - host: "ha.{{ domain_name }}"
-        paths:
-          - path: "/"
-            pathType: Prefix
-    tls:
-      - secretName: home-assistant-tls
-        hosts:
-          - "ha.{{ domain_name }}"
+  # ingress:
+  #   enabled: true
+  #   external: false
+  #   annotations:
+  #     cert-manager.io/cluster-issuer: "{{ cert_manager_cluster_issuer_name }}"
+  #   hosts:
+  #     - host: "ha.{{ domain_name }}"
+  #       paths:
+  #         - path: "/"
+  #           pathType: Prefix
+  #   tls:
+  #     - secretName: home-assistant-tls
+  #       hosts:
+  #         - "ha.{{ domain_name }}"
   hostPort:
     enabled: true
     port: 8124

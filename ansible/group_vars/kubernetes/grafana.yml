@@ -46,18 +46,18 @@ grafana_values:
   plugins:
     - victoriametrics-logs-datasource
 
-  ingress:
-    enabled: true
-    ingressClassName: public
-    annotations:
-      cert-manager.io/cluster-issuer: "{{ cert_manager_cluster_issuer_name }}"
-    hosts:
-      - "grafana.{{ domain_name }}"
-    path: "/"
-    tls:
-      - secretName: grafana-tls
-        hosts:
-          - "grafana.{{ domain_name }}"
+  # ingress:
+  #   enabled: true
+  #   ingressClassName: public
+  #   annotations:
+  #     cert-manager.io/cluster-issuer: "{{ cert_manager_cluster_issuer_name }}"
+  #   hosts:
+  #     - "grafana.{{ domain_name }}"
+  #   path: "/"
+  #   tls:
+  #     - secretName: grafana-tls
+  #       hosts:
+  #         - "grafana.{{ domain_name }}"
 
   securityContext:
     runAsUser: 472
