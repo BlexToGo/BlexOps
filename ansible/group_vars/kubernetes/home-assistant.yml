@@ -3,13 +3,16 @@
 home_assistant_chart_version: 0.3.61
 
 home_assistant_values:
+
   controller:
     type: StatefulSet
+
   persistence:
     enabled: true
     size: 1Gi
     annotations:
       k8up.io/backup: "true"
+
   additionalVolumes:
     - hostPath:
         path: >-
@@ -19,6 +22,7 @@ home_assistant_values:
   additionalMounts:
     - mountPath: /dev/ttyACM0
       name: zigbee
+
   # ingress:
   #   enabled: true
   #   external: false
@@ -33,17 +37,21 @@ home_assistant_values:
   #     - secretName: home-assistant-tls
   #       hosts:
   #         - "ha.{{ domain_name }}"
+
   hostPort:
     enabled: true
     port: 8124
   securityContext:
     privileged: true
+
   serviceMonitor:
     enabled: true
     scrapeInterval: 30s
+
   env:
     - name: MY_TIME_ZONE
       value: "Europe/Berlin"
+
   configuration:
     enabled: true
     forceInit: true
