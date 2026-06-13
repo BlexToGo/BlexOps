@@ -2,7 +2,7 @@
 # renovate: helm-chart=victoria-logs-single registryUrl=https://victoriametrics.github.io/helm-charts/
 vlogs_chart_version: 0.11.30
 # renovate: helm-chart=victoria-logs-collector registryUrl=https://victoriametrics.github.io/helm-charts/
-vlogs_collector_chart_version: 0.2.14
+vlogs_collector_chart_version: 0.3.5
 
 vlogs_values:
 
