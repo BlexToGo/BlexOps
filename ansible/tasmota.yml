@@ -46,44 +46,69 @@
       delegate_to: localhost
 
 
-- name: Change the WiFi SSID on a Tasmota device
+- name: Configure a Tasmota device
   hosts: tasmota
   tags:
-    - wifi
+    - config
     - never
   gather_facts: no
+  vars:
+    device: "{{ tasmota_devices[inventory_hostname] | default({}) }}"
+    # Settings that trigger a restart (SSID1/Password1, MqttHost, MqttUser, MqttPassword, Topic) 
+    # are bundled in a single Backlog command so they are all stored before the device reboots.
+    tasmota_commands:
+      - "SSID1 {{ wifi_ssid }}"
+      - "Password1 {{ wifi_password }}"
+      - "MqttHost {{ mqtt_host }}"
+      - "MqttPort {{ mqtt_port }}"
+      - "MqttUser {{ mqtt_user }}"
+      - "MqttPassword {{ mqtt_password }}"
+      - "Topic {{ device.topic }}"
+      - "DeviceName {{ device.name }}"
+      - "FriendlyName1 {{ device.name }}"
+      - "VoltageSet {{ voltage }}"
   tasks:
-    - name: Ensure wifi_ssid and wifi_password are defined
+    - name: Ensure required configuration variables are defined
       assert:
         that:
           - wifi_ssid is defined and wifi_ssid | length > 0
           - wifi_password is defined and wifi_password | length > 0
+          - mqtt_host is defined and mqtt_host | length > 0
+          - mqtt_port is defined and mqtt_port | length > 0
+          - mqtt_user is defined and mqtt_user | length > 0
+          - mqtt_password is defined and mqtt_password | length > 0
+          - voltage is defined and voltage | length > 0
+          - device.topic is defined and device.topic | length > 0
+          - device.name is defined and device.name | length > 0
         fail_msg: >-
-          wifi_ssid and wifi_password must be defined
+          Missing configuration for {{ inventory_hostname }}. Ensure there is an entry in the tasmota_devices dict in group_vars/tasmota/individual_config.yml.
 
-    - name: Send Backlog command to update WiFi SSID and password (device will restart)
+    - name: Send Backlog command to configure the device (device will restart)
       uri:
         url: >-
-          http://{{ ansible_host }}/cm?cmnd=Backlog%20SSID1%20{{ wifi_ssid | urlencode }}%3B%20Password1%20{{ wifi_password | urlencode }}
+          http://{{ ansible_host }}/cm?cmnd=Backlog%20{{
+            tasmota_commands | map('urlencode') | join('%3B%20')
+          }}
         method: GET
         return_content: yes
         timeout: 10
         status_code: [200, -1]
-      register: wifi_change_response
+      register: configure_response
       delegate_to: localhost
       no_log: true
       failed_when: false
 
-    - name: Report WiFi change submission
+    - name: Report configuration submission
       vars:
         hostname: "{{ inventory_hostname }}"
         ip: "{{ ansible_host | default('unknown') }}"
-        ok: "{{ wifi_change_response.status | default(0) == 200 }}"
+        ok: "{{ configure_response.status | default(0) == 200 }}"
       debug:
         msg: >-
-          {{ hostname }} ({{ ip }}): WiFi SSID update
-          {{ 'submitted to "' ~ wifi_ssid ~ '" (device is restarting)' if ok
-             else 'request did not return 200 (device may have restarted before responding)' }}
+          {{ hostname }} ({{ ip }}): configuration
+          {{ 'submitted (topic=' ~ device.topic ~ ', name=' ~ device.name ~ ') - device is restarting'
+             if ok else
+             'request did not return 200 (device may have restarted before responding)' }}
       delegate_to: localhost
 
 

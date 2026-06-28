@@ -1,0 +1,9 @@
+wifi_ssid: "{{ lookup('community.general.onepassword', 'Tasmota', section='WiFi', field='SSID', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+wifi_password: "{{ lookup('community.general.onepassword', 'Tasmota', section='WiFi', field='Password', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+
+voltage: "{{ lookup('community.general.onepassword', 'Tasmota', section='Config', field='Voltage', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+
+mqtt_host: "{{ lookup('community.general.onepassword', 'Mosquitto', field='Host', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+mqtt_port: "{{ lookup('community.general.onepassword', 'Mosquitto', field='Port', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+mqtt_user: "{{ lookup('community.general.onepassword', 'Mosquitto', field='Tasmota user', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
+mqtt_password: "{{ lookup('community.general.onepassword', 'Mosquitto', field='Tasmota password', vault='BlexOps', subdomain=onepassword_subdomain, domain=onepassword_domain, service_account_token=onepassword_service_account_token) }}"
