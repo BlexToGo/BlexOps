@@ -13,6 +13,10 @@
       register: http_response
       delegate_to: localhost
 
+    # - name: Print the full http_response for debugging
+    #   debug:
+    #     msg: "{{ http_response }}"
+
     - name: Print the Tasmota device status
       vars:
         hostname: "{{ inventory_hostname }}"
@@ -23,7 +27,8 @@
         mqtt_port: "{{ status_json.StatusMQT.MqttPort | default('no-response') }}"
         mqtt_topic: "{{ status_json.Status.Topic | default('no-response') }}"
         firmware_version: "{{ status_json.StatusFWR.Version | default('no-response') }}"
-        wifi_ssid: "{{ status_json.StatusSTS.Wifi.SSId | default(status_json.StatusNET.SSId | default('no-response')) }}"
+        wifi_ssid: "{{ status_json.StatusSTS.Wifi.SSId | default('no-response') }}"
+        uptime: "{{ status_json.StatusSTS.Uptime | default('no-response') }}"
       debug:
         msg:
           - "Hostname:    {{ hostname }}"
@@ -33,4 +38,5 @@
           - "MQTT Topic:  {{ mqtt_topic }}"
           - "Firmware:    {{ firmware_version }}"
           - "WiFi SSID:   {{ wifi_ssid }}"
+          - "Uptime:      {{ uptime }}"
       delegate_to: localhost
