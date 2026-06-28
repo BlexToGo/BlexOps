@@ -22,6 +22,7 @@
         hostname: "{{ inventory_hostname }}"
         ip: "{{ ansible_host | default('unknown') }}"
         status_json: "{{ http_response.json | default({}) }}"
+        friendly_name: "{{ status_json.Status.FriendlyName[0] | default('no-response') }}"
         device_ip: "{{ status_json.StatusNET.IPAddress | default('no-response') }}"
         mqtt_host: "{{ status_json.StatusMQT.MqttHost | default('no-response') }}"
         mqtt_port: "{{ status_json.StatusMQT.MqttPort | default('no-response') }}"
@@ -29,16 +30,19 @@
         firmware_version: "{{ status_json.StatusFWR.Version | default('no-response') }}"
         wifi_ssid: "{{ status_json.StatusSTS.Wifi.SSId | default('no-response') }}"
         uptime: "{{ status_json.StatusSTS.Uptime | default('no-response') }}"
+        voltage: "{{ status_json.StatusSNS.ENERGY.Voltage | default('no-response') }}"
       debug:
         msg:
-          - "Hostname:    {{ hostname }}"
-          - "IP:          {{ device_ip }} (inventory: {{ ip }})"
-          - "MQTT Host:   {{ mqtt_host }}"
-          - "MQTT Port:   {{ mqtt_port }}"
-          - "MQTT Topic:  {{ mqtt_topic }}"
-          - "Firmware:    {{ firmware_version }}"
-          - "WiFi SSID:   {{ wifi_ssid }}"
-          - "Uptime:      {{ uptime }}"
+          - "Hostname:      {{ hostname }}"
+          - "Friendly Name: {{ friendly_name }}"
+          - "IP:            {{ device_ip }} (inventory: {{ ip }})"
+          - "Voltage:       {{ voltage }}"
+          - "MQTT Host:     {{ mqtt_host }}"
+          - "MQTT Port:     {{ mqtt_port }}"
+          - "MQTT Topic:    {{ mqtt_topic }}"
+          - "WiFi SSID:     {{ wifi_ssid }}"
+          - "Firmware:      {{ firmware_version }}"
+          - "Uptime:        {{ uptime }}"
       delegate_to: localhost
 
 
