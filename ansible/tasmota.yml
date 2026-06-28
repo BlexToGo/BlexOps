@@ -1,27 +1,36 @@
 ---
-- name: Get the Tasmota version from a Tasmota device
-  tags: version
+- name: Get the Tasmota device status
   hosts: tasmota
+  tags: status
   gather_facts: no
   tasks:
-    - name: Get the firmware info JSON from the Tasmota device
+    - name: Get the full status JSON from the Tasmota device
       uri:
-        url: "http://{{ ansible_host }}/cm?cmnd=Status%202"
+        url: "http://{{ ansible_host }}/cm?cmnd=Status%200"
         method: GET
         return_content: yes
         timeout: 10
       register: http_response
       delegate_to: localhost
 
-    # - name: Print the full http_response for debugging
-    #   debug:
-    #     msg: "{{ http_response }}"
-
-    - name: Print the Tasmota version from the response
+    - name: Print the Tasmota device status
       vars:
-        ip: "{{ ansible_host | default('unknown') }}"
         hostname: "{{ inventory_hostname }}"
-        version: "{{ http_response.json.StatusFWR.Version if (http_response.json is defined) else 'no-response' }}"
+        ip: "{{ ansible_host | default('unknown') }}"
+        status_json: "{{ http_response.json | default({}) }}"
+        device_ip: "{{ status_json.StatusNET.IPAddress | default('no-response') }}"
+        mqtt_host: "{{ status_json.StatusMQT.MqttHost | default('no-response') }}"
+        mqtt_port: "{{ status_json.StatusMQT.MqttPort | default('no-response') }}"
+        mqtt_topic: "{{ status_json.Status.Topic | default('no-response') }}"
+        firmware_version: "{{ status_json.StatusFWR.Version | default('no-response') }}"
+        wifi_ssid: "{{ status_json.StatusSTS.Wifi.SSId | default(status_json.StatusNET.SSId | default('no-response')) }}"
       debug:
-        msg: "Tasmota version of {{ hostname }} ({{ ip }}): {{ version }}"
-      delegate_to: localhost # optional because debug tasks always run on the control node
+        msg:
+          - "Hostname:    {{ hostname }}"
+          - "IP:          {{ device_ip }} (inventory: {{ ip }})"
+          - "MQTT Host:   {{ mqtt_host }}"
+          - "MQTT Port:   {{ mqtt_port }}"
+          - "MQTT Topic:  {{ mqtt_topic }}"
+          - "Firmware:    {{ firmware_version }}"
+          - "WiFi SSID:   {{ wifi_ssid }}"
+      delegate_to: localhost
