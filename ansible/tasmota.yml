@@ -81,3 +81,98 @@
           {{ 'submitted to "' ~ wifi_ssid ~ '" (device is restarting)' if ok
              else 'request did not return 200 (device may have restarted before responding)' }}
       delegate_to: localhost
+
+
+- name: Upgrade the Tasmota firmware
+  hosts: tasmota
+  tags:
+    - upgrade
+    - never
+  gather_facts: no
+  tasks:
+    - name: Get the current firmware version before upgrade
+      uri:
+        url: "http://{{ ansible_host }}/cm?cmnd=Status%202"
+        method: GET
+        return_content: yes
+        timeout: 10
+      register: pre_upgrade_response
+      delegate_to: localhost
+
+    - name: Set the OtaUrl (only when tasmota_ota_url is defined)
+      uri:
+        url: "http://{{ ansible_host }}/cm?cmnd=OtaUrl%20{{ tasmota_ota_url | urlencode }}"
+        method: GET
+        return_content: yes
+        timeout: 10
+      register: ota_url_response
+      delegate_to: localhost
+      when: tasmota_ota_url is defined and tasmota_ota_url | length > 0
+
+    - name: Trigger the firmware upgrade (Upgrade 1 downloads from OtaUrl and restarts)
+      uri:
+        url: "http://{{ ansible_host }}/cm?cmnd=Upgrade%201"
+        method: GET
+        return_content: yes
+        timeout: 30
+        status_code: [200, -1]
+      register: upgrade_response
+      delegate_to: localhost
+      failed_when: false
+
+    - name: Report firmware upgrade trigger
+      vars:
+        hostname: "{{ inventory_hostname }}"
+        ip: "{{ ansible_host | default('unknown') }}"
+        previous_version: "{{ pre_upgrade_response.json.StatusFWR.Version | default('unknown') }}"
+        ota_url: "{{ pre_upgrade_response.json.StatusFWR.OtaUrl | default('unknown') }}"
+        upgrade_json: "{{ upgrade_response.json | default({}) }}"
+        upgrade_status: "{{ upgrade_json.Upgrade | default(upgrade_json.Command | default('no-response')) }}"
+      debug:
+        msg:
+          - "Hostname:    {{ hostname }} ({{ ip }})"
+          - "Previous:    {{ previous_version }}"
+          - "OtaUrl:      {{ ota_url }}"
+          - "Upgrade:     {{ upgrade_status }} (device is rebooting if accepted)"
+      delegate_to: localhost
+
+    - name: Wait for device to come back online
+      wait_for:
+        host: "{{ ansible_host }}"
+        port: 80
+        delay: 15
+        timeout: 180
+      delegate_to: localhost
+
+    - name: Wait for the firmware upgrade to complete (device runs a minimal firmware while upgrading, ~3 min)
+      uri:
+        url: "http://{{ ansible_host }}/cm?cmnd=Status%202"
+        method: GET
+        return_content: yes
+        timeout: 10
+        status_code: [200, -1]
+      register: post_upgrade_response
+      delegate_to: localhost
+      retries: 60
+      delay: 10
+      until: >-
+        post_upgrade_response.status | default(0) == 200
+        and (post_upgrade_response.json.StatusFWR.Version | default('')) | length > 0
+        and (post_upgrade_response.json.StatusFWR.Version | default(''))
+            != (pre_upgrade_response.json.StatusFWR.Version | default(''))
+      failed_when: false
+
+    - name: Report firmware version after upgrade
+      vars:
+        hostname: "{{ inventory_hostname }}"
+        ip: "{{ ansible_host | default('unknown') }}"
+        previous_version: "{{ pre_upgrade_response.json.StatusFWR.Version | default('unknown') }}"
+        current_version: "{{ post_upgrade_response.json.StatusFWR.Version | default('unknown') }}"
+        reachable: "{{ post_upgrade_response.status | default(0) == 200 }}"
+        changed: "{{ reachable and previous_version != current_version }}"
+      debug:
+        msg: >-
+          {{ hostname }} ({{ ip }}): firmware {{ previous_version }} ->
+          {{ current_version if reachable else 'unreachable (upgrade may still be in progress)' }}
+          {{ '(upgraded)' if changed else ('(unchanged - upgrade may have failed or timed out)' if reachable else '') }}
+      delegate_to: localhost
