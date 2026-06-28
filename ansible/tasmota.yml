@@ -40,3 +40,44 @@
           - "WiFi SSID:   {{ wifi_ssid }}"
           - "Uptime:      {{ uptime }}"
       delegate_to: localhost
+
+
+- name: Change the WiFi SSID on a Tasmota device
+  hosts: tasmota
+  tags:
+    - wifi
+    - never
+  gather_facts: no
+  tasks:
+    - name: Ensure wifi_ssid and wifi_password are defined
+      assert:
+        that:
+          - wifi_ssid is defined and wifi_ssid | length > 0
+          - wifi_password is defined and wifi_password | length > 0
+        fail_msg: >-
+          wifi_ssid and wifi_password must be defined
+
+    - name: Send Backlog command to update WiFi SSID and password (device will restart)
+      uri:
+        url: >-
+          http://{{ ansible_host }}/cm?cmnd=Backlog%20SSID1%20{{ wifi_ssid | urlencode }}%3B%20Password1%20{{ wifi_password | urlencode }}
+        method: GET
+        return_content: yes
+        timeout: 10
+        status_code: [200, -1]
+      register: wifi_change_response
+      delegate_to: localhost
+      no_log: true
+      failed_when: false
+
+    - name: Report WiFi change submission
+      vars:
+        hostname: "{{ inventory_hostname }}"
+        ip: "{{ ansible_host | default('unknown') }}"
+        ok: "{{ wifi_change_response.status | default(0) == 200 }}"
+      debug:
+        msg: >-
+          {{ hostname }} ({{ ip }}): WiFi SSID update
+          {{ 'submitted to "' ~ wifi_ssid ~ '" (device is restarting)' if ok
+             else 'request did not return 200 (device may have restarted before responding)' }}
+      delegate_to: localhost
