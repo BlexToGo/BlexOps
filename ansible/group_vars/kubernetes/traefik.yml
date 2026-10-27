@@ -49,10 +49,9 @@ traefik_values:
     capabilities:
       add: [NET_BIND_SERVICE]
 
-  logs:
-    access:
-      enabled: true
-      timezone: "Europe/Berlin"
+  accessLog:
+    enabled: true
+    timezone: "Europe/Berlin"
 
   # Enable Prometheus metrics
   # metrics:
