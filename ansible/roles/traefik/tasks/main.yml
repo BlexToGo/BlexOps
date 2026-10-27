@@ -14,3 +14,24 @@
     create_namespace: true
     values:
       "{{ traefik_values }}"
+
+- name: Deploy VMServiceScrape for Traefik
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operator.victoriametrics.com/v1beta1
+      kind: VMServiceScrape
+      metadata:
+        name: "{{ traefik_release_name }}"
+        namespace: "{{ traefik_namespace }}"
+        labels:
+          app.kubernetes.io/name: "{{ traefik_release_name }}"
+      spec:
+        endpoints:
+          - port: metrics
+            path: /metrics
+        selector:
+          matchLabels:
+            app.kubernetes.io/name: "{{ traefik_release_name }}"
+            app.kubernetes.io/instance: "{{ traefik_release_name }}-{{ traefik_namespace }}"
+            app.kubernetes.io/component: metrics

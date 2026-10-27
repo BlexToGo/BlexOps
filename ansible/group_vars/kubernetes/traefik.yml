@@ -54,10 +54,7 @@ traefik_values:
     timezone: "Europe/Berlin"
 
   # Enable Prometheus metrics
-  # metrics:
-  #   prometheus:
-  #     service:
-  #       enabled: true
-  #     serviceMonitor:
-  #       enabled: true
-  #       scrapeInterval: 60s
+  metrics:
+    prometheus:
+      service:
+        enabled: true
