@@ -1,6 +1,6 @@
 ---
 # renovate: helm-chart=traefik registryUrl=https://traefik.github.io/charts
-traefik_chart_version: 42.1.3
+traefik_chart_version: 42.2.0
 
 traefik_values:
   ingressClass:
